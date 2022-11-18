@@ -1,0 +1,39 @@
+{
+    "intents": [
+      {
+        "tag": "greeting",
+        "patterns": ["hey", "hi", "hello"],
+        "responses": ["Hello","Hi","Hello there"],
+        "context": [""]
+      }
+      ,
+      {
+        "tag": "thankyou",
+        "patterns": ["thank you","thanks"],
+        "responses": ["You are very welcome.","You're welcome"],
+        "context": [""]
+      }
+      ,
+      {
+        "tag": "",
+        "patterns": [""],
+        "responses": [""],
+        "context": [""]
+      }
+      ,
+      {
+        "tag": "",
+        "patterns": [""],
+        "responses": [""],
+        "context": [""]
+      }
+      ,
+      {
+        "tag": "who_are_you",
+        "patterns": ["who are you?", "what are you","what is your name"],
+        "responses": ["I am Vendetta, a virtual pentesting assistant"],
+        "context": [""]
+      }
+    ]
+  }
+  
