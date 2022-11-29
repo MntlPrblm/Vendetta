@@ -8,13 +8,22 @@ import sys
 import time
 import urllib
 import traceback
+import requests
+import getpass
+import socket
+import json
+import io
+import time
 import types
-from collections import OrderedDict
-from datetime import date
 import nltk
 import numpy as np
+from collections import OrderedDict
+from datetime import date, datetime
 from nltk.stem import WordNetLemmatizer
+from colorama import Fore
+from time import sleep
 from scapy.all import ARP, Ether, srp
+from instabot import Bot
 
 import tensorflow as tf
 from tensorflow.keras import Sequential
@@ -167,6 +176,17 @@ def start():
     while True:
         user_in = input("Input: ")
         #hard coded responses and functions-----------------------------------
+        #help function to display commands
+        if user_in == "help":
+            print("loading dataset...")
+            f = open("./help.txt")
+            lines = f.read().splitlines()
+            f.close()
+            for line in lines:
+                print(line)
+        #if user wants to check connection
+        if "check connection" in user_in:
+            check_connection()
         #deletes log
         if "removelog" in user_in:
             user_in = user_in.split(" ")[1]
@@ -174,7 +194,6 @@ def start():
                 os.remove("./logs/"+user_in)
             else:
                 print("file not found")
-
         #reads log files
         if "readlog" in user_in:
             user_in = user_in.split(" ")[1]
@@ -202,6 +221,9 @@ def start():
         #clears the screen on command
         if user_in == "clear":
             clear()
+        #check phishing website
+        if user_in == "check phish":
+            check_phish()
         #goes to intents.json for response----------------------------------------
         intents = pred_class(user_in, words, classes)
         result = get_response(intents, data)
@@ -215,7 +237,6 @@ def check_connection():
     except OSError:
         print("network connection not found")
         time.sleep(1)
-        start()
 
 #shows who is on your network
 def network_scan():
@@ -262,11 +283,20 @@ def network_scan():
             f1.write('\n')
         f1.close()
 
-    
+#function to clear screen
+def clear():
+    if os.name == 'nt':
+        _ = os.system('cls')
+    else:
+        _ = os.system('clear')
 
+#instagram
+#use instabot and still needs to add help section and start user input to call
 
+def check_phish():
+    print("Please enter url to check")
+    url_to_check_phish = input("Input: ")
+    os.system("ping "+url_to_check_phish)
 
 if __name__=="__main__":
     start()
-
-
