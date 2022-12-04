@@ -1,0 +1,11 @@
+help
+check connection
+show logs
+readlog
+removelog
+quit
+train
+network scan
+clear
+check phish
+search
