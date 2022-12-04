@@ -16,6 +16,7 @@ import io
 import time
 import types
 import nltk
+import webbrowser
 import numpy as np
 from collections import OrderedDict
 from datetime import date, datetime
@@ -28,17 +29,26 @@ from instabot import Bot
 import tensorflow as tf
 from tensorflow.keras import Sequential
 from tensorflow.keras.layers import Dense, Dropout
+from googlesearch import search
+
 
 #checks to see if nltk data needs to be downloaded
-if os.path.exists("nltkdata.txt") == False:
-    f = open("nltkdata.txt", "x")
-    print("Downloading nltk data...")
-    nltk.download("punkt")
-    nltk.download("wordnet")
-else:
-    print("nltk data found")
+def check_nltk():
+    if os.path.exists("nltkdata.txt") == False:
+        f = open("nltkdata.txt", "x")
+        print("Trying downloading nltk data...")
+        try:
+            nltk.download("punkt")
+            nltk.download("wordnet")
+        except LookupError:
+            print("Data not found downloading")
+            nltk.download("punkt")
+            nltk.download("wordnet") 
+    else:
+        print("nltk data found")
+check_nltk()
 
-    #clears the screen
+#clears the screen
 def clear():
     if os.name == "posix":
         _ = os.system('clear')
@@ -61,7 +71,12 @@ data_y = []
 #appends arrays
 for intent in data["intents"]:
     for pattern in intent["patterns"]:
-        tokens = nltk.word_tokenize(pattern)
+        try:
+            tokens = nltk.word_tokenize(pattern)
+        except LookupError:
+            nltk.download('punkt')
+            nltk.download('wordnet')
+            check_nltk
         words.extend(tokens)
         data_x.append(pattern)
         data_y.append(intent["tag"])
@@ -101,7 +116,7 @@ model.add(Dropout(0.5))
 model.add(Dense(64, activation="relu"))
 model.add(Dropout(0.5))
 model.add(Dense(len(train_y[0]), activation="softmax"))
-adam = tf.keras.optimizers.Adam(learning_rate=0.01, decay=1e-6)
+adam = tf.keras.optimizers.Adam(learning_rate=0.01)
 model.compile(loss='categorical_crossentropy', optimizer=adam, metrics=["accuracy"])
 clear()
 print("Training model...")
@@ -169,13 +184,18 @@ def start():
             exec(open("restart.py").read())
         else:
             previous_lc = current_lc
-
     print(titlescreen)
     print("previous line count: "+str(previous_lc))
     print("json line count: "+str(current_lc))
     while True:
         user_in = input("Input: ")
         #hard coded responses and functions-----------------------------------
+        #if user wants to search something
+        if "search" in user_in:
+            print("Printing articles")
+            for j in search(user_in, tld="co.in", num=10, stop=10, pause=2):
+                print(j)
+            webbrowser.open(j)
         #help function to display commands
         if user_in == "help":
             print("loading dataset...")
@@ -191,7 +211,10 @@ def start():
         if "removelog" in user_in:
             user_in = user_in.split(" ")[1]
             if os.path.exists("./logs/"+user_in) == True:
-                os.remove("./logs/"+user_in)
+                try:
+                    os.remove("./logs/"+user_in)
+                except PermissionError:
+                    print("You need admin privs to do this")
             else:
                 print("file not found")
         #reads log files
@@ -224,15 +247,26 @@ def start():
         #check phishing website
         if user_in == "check phish":
             check_phish()
+        #checks connection
+        if user_in == "check connection":
+            check_connection()
+        #if user wants to run shell commands
+        if user_in == "cmd":
+            cmd()
         #goes to intents.json for response----------------------------------------
         intents = pred_class(user_in, words, classes)
         result = get_response(intents, data)
         print("Vendetta: "+result)
+#runs regular commands until quit
+def cmd():
+    print("Restored back to shell, re run the script to continue")
+    sys.exit()
 
 #checks to see if there is an active connection
 def check_connection():
     try:
         socket.create_connection(("1.1.1.1", 53))
+        clear()
         print("found connection")
     except OSError:
         print("network connection not found")
@@ -299,4 +333,9 @@ def check_phish():
     os.system("ping "+url_to_check_phish)
 
 if __name__=="__main__":
-    start()
+    try:
+        start()
+    except:
+        KeyboardInterrupt
+        print("Keyboard interrupt detected")
+        sys.exit()
