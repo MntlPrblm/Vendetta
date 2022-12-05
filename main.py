@@ -190,6 +190,11 @@ def start():
     while True:
         user_in = input("Input: ")
         #hard coded responses and functions-----------------------------------
+        #if user wants to create note or log
+        if "make log" in user_in:
+            filename = input("Filename: ")
+            make_log(filename)
+
         #if user wants to search something
         if "search" in user_in:
             print("Printing articles")
@@ -247,9 +252,6 @@ def start():
         #check phishing website
         if user_in == "check phish":
             check_phish()
-        #checks connection
-        if user_in == "check connection":
-            check_connection()
         #if user wants to run shell commands
         if user_in == "cmd":
             cmd()
@@ -257,6 +259,18 @@ def start():
         intents = pred_class(user_in, words, classes)
         result = get_response(intents, data)
         print("Vendetta: "+result)
+def make_log(filename):
+    f = open('./logs/'+filename, 'a')
+    contents = input("contents: ")
+    f.write(contents)
+    f.write('\n')
+    f.seek(0,0)
+    f.close()
+    if contents == "quit":
+        start()
+    else:
+        make_log(filename)
+    
 #runs regular commands until quit
 def cmd():
     print("Restored back to shell, re run the script to continue")
